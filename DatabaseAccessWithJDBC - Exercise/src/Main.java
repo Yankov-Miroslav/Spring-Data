@@ -22,8 +22,35 @@ public class Main {
             case 2 -> exerciseTwo();
             case 3 -> exerciseThree();
             case 4 -> exerciseFour();
+            case 5 -> exerciseFive();
         }
 
+
+    }
+
+    private static void exerciseFive() throws IOException, SQLException {
+        System.out.println("Enter country name:");
+        String countryName = reader.readLine();
+
+        PreparedStatement preparedStatement = connection.prepareStatement("UPDATE towns SET name = UPPER(name) WHERE country = ?");
+        preparedStatement.setString(1, countryName);
+        int affectedRows = preparedStatement.executeUpdate();
+
+        if (affectedRows == 0 ){
+            System.out.println("No town names were affected.");
+            return;
+        }
+
+        System.out.printf("%d town names were affected.%n", affectedRows);
+
+        PreparedStatement preparedStatementTowns = connection.prepareStatement("SELECT name FROM towns WHERE country = ?");
+
+        preparedStatementTowns.setString(1,countryName);
+        ResultSet resultSet = preparedStatementTowns.executeQuery();
+
+        while (resultSet.next()){
+            System.out.println(resultSet.getString("name"));
+        }
 
     }
 
