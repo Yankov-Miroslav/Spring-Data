@@ -26,7 +26,31 @@ public class Main {
             case 5 -> exerciseFive();
             case 6 -> exerciseSix();
             case 7 -> exerciseSeven();
+            case 8 -> exerciseEight();
+            case 9 -> exerciseNine();
         }
+
+
+    }
+
+    private static void exerciseEight() {
+    }
+
+    private static void exerciseNine() throws IOException, SQLException {
+
+        System.out.println("Enter minion id:");
+        int minionId = Integer.parseInt(reader.readLine());
+
+        CallableStatement callableStatement = connection.prepareCall("CALL usp_get_older(?)");
+        callableStatement.setInt(1, minionId);
+        callableStatement.executeUpdate();
+        String query = "SELECT name, age FROM minions WHERE id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setInt(1, minionId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        System.out.println(resultSet.getString(1) + " " + resultSet.getInt(2));
+
 
 
     }
@@ -55,7 +79,6 @@ public class Main {
         deleteVillain.executeUpdate();
 
     }
-
 
     private static void exerciseSeven() throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT name FROM minions;");
@@ -232,7 +255,6 @@ public class Main {
         return resultSet.getString(1);
     }
 
-
     private static void exerciseTwo() throws SQLException {
 
         PreparedStatement preparedStatement = connection
@@ -249,7 +271,6 @@ public class Main {
         }
 
     }
-
 
     private static Connection getConnection() throws IOException, SQLException {
 
