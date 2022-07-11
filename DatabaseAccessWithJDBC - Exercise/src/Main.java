@@ -2,7 +2,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.*;
+import java.util.LinkedHashSet;
 import java.util.Properties;
+import java.util.Set;
 
 public class Main {
 
@@ -11,19 +13,68 @@ public class Main {
 
     public static void main(String[] args) throws SQLException, IOException {
 
-         connection = getConnection();
+        connection = getConnection();
 
         System.out.println("Enter exercise number:");
         int exerciseNumber = Integer.parseInt(reader.readLine());
 
-        switch (exerciseNumber){
-            case 2 : exerciseOne();
+        switch (exerciseNumber) {
+            case 2 -> exerciseTwo();
+            case 3 -> exerciseThree();
         }
 
 
     }
 
-    private static void exerciseOne() throws SQLException {
+    private static void exerciseThree() throws IOException, SQLException {
+        System.out.println("Enter villain id:");
+        int villainId = Integer.parseInt(reader.readLine());
+
+
+        try {
+            String villainName = findEntityNameById(villainId);
+            System.out.println("Villain: " + villainName);
+        } catch (Exception e){
+            System.out.println("No villain with ID " + villainId + " exists in the database.");
+        }
+
+        Set<String> allMinionsByVillainId = getAllMinionsByVillainId(villainId);
+
+        for (String minion : allMinionsByVillainId) {
+            System.out.println(minion);
+        }
+
+    }
+
+    private static Set<String> getAllMinionsByVillainId(int villainId) throws SQLException {
+        Set<String> result = new LinkedHashSet<>();
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT m.name, m.age FROM minions m " +
+                "join minions_villains mv on m.id = mv.minion_id " +
+                "where mv.villain_id = ?;");
+        preparedStatement.setInt(1, villainId);
+
+        ResultSet resultSet = preparedStatement.executeQuery();
+        int counter = 0;
+
+        while (resultSet.next()) {
+            result.add(String.format("%d. %s %d", ++counter,
+                    resultSet.getString("name"),
+                    resultSet.getInt("age")));
+        }
+        return result;
+    }
+
+    private static String findEntityNameById(int entityId) throws SQLException {
+        String query = String.format("SELECT name FROM %s WHERE id = ?", "villains");
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setInt(1, entityId);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        resultSet.next();
+        return resultSet.getString(1);
+    }
+
+
+    private static void exerciseTwo() throws SQLException {
 
         PreparedStatement preparedStatement = connection
                 .prepareStatement("SELECT v.name, COUNT(DISTINCT mv.minion_id) as `m_count` FROM villains v " +
