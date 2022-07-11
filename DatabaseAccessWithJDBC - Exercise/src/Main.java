@@ -9,7 +9,7 @@ public class Main {
     private static final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     private static Connection connection;
 
-    public Main()  {
+    public Main() {
     }
 
     public static void main(String[] args) throws SQLException, IOException {
@@ -30,10 +30,32 @@ public class Main {
             case 9 -> exerciseNine();
         }
 
-
     }
 
-    private static void exerciseEight() {
+    private static void exerciseEight() throws IOException, SQLException {
+        System.out.println("Enter minions ids:");
+        String[] ids = reader.readLine().split("\\s+");
+
+        for (String id : ids) {
+            int currentId = Integer.parseInt(id);
+            PreparedStatement updateAges = connection.prepareStatement(" UPDATE minions " +
+                    " SET age = age + 1 " +
+                    " WHERE id = ?;");
+            updateAges.setInt(1, currentId);
+            updateAges.executeUpdate();
+            PreparedStatement updateNames = connection.prepareStatement(" UPDATE minions " +
+                    " SET name = LOWER(name) " +
+                    " WHERE id = ?;");
+            updateNames.setInt(1, currentId);
+            updateNames.executeUpdate();
+
+        }
+        PreparedStatement findAllById = connection.prepareStatement("SELECT name, age FROM minions");
+        ResultSet resultSet = findAllById.executeQuery();
+        while (resultSet.next()) {
+            System.out.println(resultSet.getString(1) + " " + resultSet.getInt(2));
+        }
+
     }
 
     private static void exerciseNine() throws IOException, SQLException {
@@ -44,15 +66,21 @@ public class Main {
         CallableStatement callableStatement = connection.prepareCall("CALL usp_get_older(?)");
         callableStatement.setInt(1, minionId);
         callableStatement.executeUpdate();
+
+        ResultSet resultSet = getNameAndAge(minionId);
+
+        System.out.println(resultSet.getString(1) + " " + resultSet.getInt(2));
+
+
+    }
+
+    private static ResultSet getNameAndAge(int minionId) throws SQLException {
         String query = "SELECT name, age FROM minions WHERE id = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         preparedStatement.setInt(1, minionId);
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
-        System.out.println(resultSet.getString(1) + " " + resultSet.getInt(2));
-
-
-
+        return resultSet;
     }
 
     private static void exerciseSix() throws SQLException, IOException {
@@ -60,11 +88,11 @@ public class Main {
         int villainId = Integer.parseInt(reader.readLine());
 
         try {
-        PreparedStatement villainName = connection.prepareStatement("SELECT name FROM villains WHERE id  = ?;");
-        villainName.setInt(1, villainId);
-        ResultSet resultSet = villainName.executeQuery();
-        resultSet.next();
-        String name = resultSet.getString(1);
+            PreparedStatement villainName = connection.prepareStatement("SELECT name FROM villains WHERE id  = ?;");
+            villainName.setInt(1, villainId);
+            ResultSet resultSet = villainName.executeQuery();
+            resultSet.next();
+            String name = resultSet.getString(1);
             System.out.println(name + " was deleted");
         } catch (Exception e) {
             System.out.println("No such villain was found");
@@ -274,14 +302,14 @@ public class Main {
 
     private static Connection getConnection() throws IOException, SQLException {
 
-//        System.out.println("Enter user:");
-//        String user = reader.readLine();
-//        System.out.println("Enter password:");
-//        String password = reader.readLine();
+        System.out.println("Enter user:");
+        String user = reader.readLine();
+        System.out.println("Enter password:");
+        String password = reader.readLine();
 
         Properties properties = new Properties();
-        properties.setProperty("user", "root");
-        properties.setProperty("password", "1234");
+        properties.setProperty("user", user);
+        properties.setProperty("password", password);
 
         return DriverManager.getConnection("jdbc:mysql://localhost:3306/minions_db", properties);
     }
