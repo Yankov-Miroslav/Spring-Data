@@ -9,6 +9,9 @@ public class Main {
     private static final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     private static Connection connection;
 
+    public Main()  {
+    }
+
     public static void main(String[] args) throws SQLException, IOException {
 
         connection = getConnection();
@@ -21,24 +24,50 @@ public class Main {
             case 3 -> exerciseThree();
             case 4 -> exerciseFour();
             case 5 -> exerciseFive();
+            case 6 -> exerciseSix();
             case 7 -> exerciseSeven();
         }
 
 
     }
 
+    private static void exerciseSix() throws SQLException, IOException {
+        System.out.println("Enter villain id:");
+        int villainId = Integer.parseInt(reader.readLine());
+
+        try {
+        PreparedStatement villainName = connection.prepareStatement("SELECT name FROM villains WHERE id  = ?;");
+        villainName.setInt(1, villainId);
+        ResultSet resultSet = villainName.executeQuery();
+        resultSet.next();
+        String name = resultSet.getString(1);
+            System.out.println(name + " was deleted");
+        } catch (Exception e) {
+            System.out.println("No such villain was found");
+            return;
+        }
+        PreparedStatement deleteMinions = connection.prepareStatement("DELETE FROM minions_villains WHERE villain_id = ?;");
+        deleteMinions.setInt(1, villainId);
+        System.out.println(deleteMinions.executeUpdate() + " minions released");
+
+        PreparedStatement deleteVillain = connection.prepareStatement("DELETE FROM villains WHERE id  = ?;");
+        deleteVillain.setInt(1, villainId);
+        deleteVillain.executeUpdate();
+
+    }
+
+
     private static void exerciseSeven() throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT name FROM minions;");
         List<String> names = new ArrayList<>();
         ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()){
+        while (resultSet.next()) {
             names.add(resultSet.getString(1));
 
         }
-        int count = 0;
         for (int i = 0; i < names.size() / 2; i++) {
             System.out.println(names.get(i));
-            System.out.println(names.get(names.size()-i -1));
+            System.out.println(names.get(names.size() - i - 1));
         }
     }
 
@@ -50,7 +79,7 @@ public class Main {
         preparedStatement.setString(1, countryName);
         int affectedRows = preparedStatement.executeUpdate();
 
-        if (affectedRows == 0 ){
+        if (affectedRows == 0) {
             System.out.println("No town names were affected.");
             return;
         }
@@ -59,10 +88,10 @@ public class Main {
 
         PreparedStatement preparedStatementTowns = connection.prepareStatement("SELECT name FROM towns WHERE country = ?");
 
-        preparedStatementTowns.setString(1,countryName);
+        preparedStatementTowns.setString(1, countryName);
         ResultSet resultSet = preparedStatementTowns.executeQuery();
 
-        while (resultSet.next()){
+        while (resultSet.next()) {
             System.out.println(resultSet.getString("name"));
         }
 
@@ -80,7 +109,7 @@ public class Main {
         if (!minionCityExists(minionCity)) {
             addMinionCityToDB(minionCity);
         }
-        if (!villainExists(villainName)){
+        if (!villainExists(villainName)) {
             addVillain(villainName);
         }
 
@@ -108,7 +137,7 @@ public class Main {
         preparedStatement.setInt(2, villainId);
         preparedStatement.executeUpdate();
 
-        System.out.println("Successfully added " + minionName +" to be minion of " + villainName);
+        System.out.println("Successfully added " + minionName + " to be minion of " + villainName);
     }
 
     private static void addMinionToDB(String minionName, int minionAge, String minionCity) throws SQLException {
@@ -135,7 +164,7 @@ public class Main {
 
     private static boolean villainExists(String villainName) throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM villains WHERE villains.name = ?;");
-        preparedStatement.setString(1, villainName );
+        preparedStatement.setString(1, villainName);
 
         ResultSet resultSet = preparedStatement.executeQuery();
         return resultSet.next();
@@ -150,7 +179,7 @@ public class Main {
 
     private static boolean minionCityExists(String minionCity) throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM towns WHERE towns.name = ?;");
-        preparedStatement.setString(1, minionCity );
+        preparedStatement.setString(1, minionCity);
 
         ResultSet resultSet = preparedStatement.executeQuery();
         return resultSet.next();
@@ -164,7 +193,7 @@ public class Main {
         try {
             String villainName = findEntityNameById(villainId);
             System.out.println("Villain: " + villainName);
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println("No villain with ID " + villainId + " exists in the database.");
         }
 
