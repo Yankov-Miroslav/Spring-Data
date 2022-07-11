@@ -2,9 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.*;
-import java.util.LinkedHashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 public class Main {
 
@@ -23,9 +21,25 @@ public class Main {
             case 3 -> exerciseThree();
             case 4 -> exerciseFour();
             case 5 -> exerciseFive();
+            case 7 -> exerciseSeven();
         }
 
 
+    }
+
+    private static void exerciseSeven() throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT name FROM minions;");
+        List<String> names = new ArrayList<>();
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()){
+            names.add(resultSet.getString(1));
+
+        }
+        int count = 0;
+        for (int i = 0; i < names.size() / 2; i++) {
+            System.out.println(names.get(i));
+            System.out.println(names.get(names.size()-i -1));
+        }
     }
 
     private static void exerciseFive() throws IOException, SQLException {
