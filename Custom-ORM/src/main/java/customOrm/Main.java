@@ -29,7 +29,12 @@ public class Main {
 
         Address softUniAddress = entityManager.findById(1, Address.class);
         Address codexioAddress = entityManager.findById(2, Address.class);
-        //    Department byId1 = entityManager.findById(30, Department.class);
+        Department byId1 = entityManager.findById(30, Department.class);
+
+        System.out.println(byId.getSalary());
+        System.out.println(byId1);
+        System.out.println(softUniAddress.getStreetNumber());
+        System.out.println(codexioAddress.getStreet());
 
     }
 }

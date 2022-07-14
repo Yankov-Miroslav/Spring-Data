@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Arrays;
 
 
@@ -46,9 +47,12 @@ public class EntityManagerImpl implements EntityManager {
             if (field.isAnnotationPresent(Column.class)){
                 Column columnInfo = field.getAnnotation(Column.class);
                 String setterName = "set" + ((field.getName().charAt(0))+"").toUpperCase() + field.getName().substring(1);
-                if (field.getType().equals(String.class)){
+                if (field.getType().equals(String.class)) {
                     String s = resultSet.getString(columnInfo.name());
                     type.getMethod(setterName, String.class).invoke(entity, s);
+                } else if (field.getType().equals(LocalDate.class)) {
+                    LocalDate s = LocalDate.parse(resultSet.getString(columnInfo.name()));
+                    type.getMethod(setterName, field.getType()).invoke(entity, s);
                 } else {
                     int s = resultSet.getInt(columnInfo.name());
                     type.getMethod(setterName, field.getType()).invoke(entity, s);
